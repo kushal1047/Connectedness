@@ -20,7 +20,7 @@ namespace Connectedness.API.Controllers
             var existingUser = _context.Users.FirstOrDefault(u=> u.Email == dto.Email);
             if (existingUser != null)
             {
-                return BadRequest("Email is already registered!");
+                return BadRequest("Email is already registered");
             }
             var newUser = new User() { 
             FullName = dto.FullName,
