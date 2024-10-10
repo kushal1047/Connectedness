@@ -22,6 +22,7 @@ namespace Connectedness.API.Controllers
             {
                 GroupName = dto.GroupName,
                 CreatedAt = DateTime.UtcNow,
+                CreatedByUserId = dto.CreatorUserId,
                 GroupMembers = new List<GroupMember>()
             };
             var uniqueMemberIds = dto.MemberUserIds.Prepend(dto.CreatorUserId).ToList().Distinct();
@@ -32,6 +33,29 @@ namespace Connectedness.API.Controllers
             _context.Groups.Add(group);
             _context.SaveChanges();
             return Ok(new {message = "Group Created Successfully!", groupId = group.GroupId });
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetGroup(int id)
+        {
+            var group = _context.Groups.Where(group => group.GroupId == id)
+                        .Select(group => new { 
+                            group.GroupId,
+                            group.GroupName,
+                            group.CreatedAt,
+                            CreatedBy = group.CreatedByUser.FullName,
+                            Members = group.GroupMembers.Select(member=> new
+                            {
+                                member.UserId,
+                                member.User.FullName,
+                                member.User.Email
+                            }).ToList()
+                        }).FirstOrDefault();
+            if (group == null)
+            {
+                return NotFound("Group not found!");
+            }
+            return Ok(group);
         }
 
         
