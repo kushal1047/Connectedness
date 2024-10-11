@@ -20,7 +20,7 @@ namespace Connectedness.API.Controllers
         {
             var user = await _context.Users.FirstOrDefaultAsync(u=> u.Email == dto.Email);
             if (user == null || user.PasswordHash != dto.Password) {
-                return Unauthorized("Invalid Email or Password! Please try again.");
+                return Unauthorized("Invalid Email or Password. Please try again.");
             }
             return Ok(new {message = "Login successful!", userId = user.UserId});
         }
