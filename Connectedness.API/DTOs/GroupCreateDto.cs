@@ -2,8 +2,8 @@ namespace Connectedness.API.DTOs
 {
     public class GroupCreateDto
     {
-        public string GroupName { get; set; }
+        public required string GroupName { get; set; }
         public int CreatorUserId { get; set; } 
-        public List<int> MemberUserIds { get; set; }
+        public required List<int> MemberUserIds { get; set; }
     }
 }
