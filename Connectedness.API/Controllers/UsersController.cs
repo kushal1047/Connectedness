@@ -44,5 +44,29 @@ namespace Connectedness.API.Controllers
             _context.SaveChanges();
             return Ok(new { message= "User registeration successful!", userId= newUser.UserId });
         }
+
+        [HttpGet("{userId}/groups")]
+        public IActionResult GetGroupsForUser(int userId)
+        {
+            var groups = _context.GroupMembers
+                         .Where(gm => gm.UserId == userId)
+                         .Select(gm => new
+                         {
+                             gm.Group!.GroupId,
+                             gm.Group.GroupName,
+                             gm.Group.CreatedAt,
+                             CreatedBy = gm.Group.CreatedByUser!.FullName,
+                             Members = gm.Group.GroupMembers.Select(member => new {
+                                 member.User!.UserId,
+                                 member.User.FullName,
+                                 member.User.Email
+                             }).ToList()
+                         }).ToList();
+            if (!groups.Any())
+            {
+                return NotFound("User doesn't belong to any group.");
+            }
+            return Ok(groups);
+        }
     }
 }
