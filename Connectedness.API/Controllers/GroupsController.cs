@@ -68,7 +68,7 @@ namespace Connectedness.API.Controllers
             }
             var group = _context.Groups.Where(group => group.GroupId == groupId).FirstOrDefault();
             if (group == null) {
-                return NotFound("Group not found! Please try a different id.");
+                return NotFound("Group not found!");
             }
             if (userId != group.CreatedByUserId)
             {
@@ -103,6 +103,25 @@ namespace Connectedness.API.Controllers
             return Ok("The user has successfully left the group.");
         }
 
-  
+        [HttpDelete("{groupId}")]
+        public IActionResult DeleteGroup(int groupId, [FromQuery] int userId)
+        {
+            var group = _context.Groups
+                .Include(group=>group.GroupMembers)
+                .FirstOrDefault(group=> group.GroupId == groupId);
+            if (group == null)
+            {
+                return NotFound("Group not found.");
+            }
+            if (userId != group.CreatedByUserId)
+            {
+                return StatusCode(403, "Only group admin can delete this group.");
+            }
+            _context.GroupMembers.RemoveRange(group.GroupMembers);
+            _context.Groups.Remove(group);
+            _context.SaveChanges();
+            return Ok(new {message = "Group deleted successfully."});
+
+        }
     }
 }
