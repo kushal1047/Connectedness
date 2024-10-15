@@ -2,6 +2,7 @@ using Connectedness.API.Data;
 using Connectedness.API.Models;
 using Connectedness.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace Connectedness.API.Controllers
 {
@@ -56,6 +57,26 @@ namespace Connectedness.API.Controllers
                 return NotFound("Group not found!");
             }
             return Ok(group);
+        }
+
+        [HttpPut("{groupId}/update-name")]
+        public IActionResult UpdateGroupName(int groupId, [FromBody] string newName, [FromQuery] int userId)
+        {   if (string.IsNullOrWhiteSpace(newName))
+            {
+                return BadRequest("Group name cannot be empty.");
+            }
+            var group = _context.Groups.Where(group => group.GroupId == groupId).FirstOrDefault();
+            if (group == null) {
+                return NotFound("Group not found! Please try a different id.");
+            }
+            if (userId != group.CreatedByUserId)
+            {
+                return Unauthorized("Only user admin can update the group name.");
+            }
+            group.GroupName = newName;
+            _context.SaveChanges();
+            return Ok(new {message = "Group name updated successfully.", group});
+
         }
 
     }
