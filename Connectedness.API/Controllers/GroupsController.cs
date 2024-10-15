@@ -3,6 +3,7 @@ using Connectedness.API.Models;
 using Connectedness.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace Connectedness.API.Controllers
 {
@@ -78,6 +79,30 @@ namespace Connectedness.API.Controllers
             return Ok(new {message = "Group name updated successfully.", group});
 
         }
+        [HttpDelete("{groupId}/leave/{userId}")]
+        public IActionResult LeaveGroup(int groupId, int userId)
+        {
+            var group = _context.Groups.
+                Include(group=>group.GroupMembers).
+                Where(group => group.GroupId == groupId).FirstOrDefault();
+            if (group == null)
+            {
+                return NotFound("Unable to find group.");
+            }
+            var user = group.GroupMembers.Where(member=> member.UserId == userId).FirstOrDefault();
+            if (user == null)
+            {
+                return NotFound("User is not a member of this group.");
+            }
+            if (user.UserId == group.CreatedByUserId)
+            {
+                return BadRequest("Group Creators cannot leave the group. They may only transfer the ownership or delete the group.");
+            }
+            _context.GroupMembers.Remove(user);
+            _context.SaveChanges();
+            return Ok("The user has successfully left the group.");
+        }
 
+  
     }
 }
