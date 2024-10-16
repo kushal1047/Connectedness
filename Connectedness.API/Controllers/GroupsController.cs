@@ -123,5 +123,30 @@ namespace Connectedness.API.Controllers
             return Ok(new {message = "Group deleted successfully."});
 
         }
+
+        [HttpPut("{groupId}/transfer-ownership")]
+        public IActionResult TransferOwnership(int groupId, [FromQuery] int userId, [FromQuery] int newOwnerId)
+        {
+            var group = _context.Groups
+                        .Include(group => group.GroupMembers)
+                        .Include(group => group.CreatedByUser)
+                        .FirstOrDefault(group => group.GroupId == groupId);
+            if (group == null)
+            {
+                return NotFound("Group Not Found!");
+            }
+            if (!(group.GroupMembers.Any(member=>member.UserId == newOwnerId)))
+            {
+                return BadRequest("User can transfer ownership to a group member only.");
+            }
+            if (group.CreatedByUserId != userId)
+            {
+                return Unauthorized("Only group admin can transfer ownership.");
+            }
+            group.CreatedByUserId = newOwnerId;
+            _context.SaveChanges();
+            _context.Entry(group).Reference(group => group.CreatedByUser).Load();
+            return Ok(new { message= $"Group ownership is transfered successfully. New group owner is {group.CreatedByUser!.FullName}"});
+        }
     }
 }
