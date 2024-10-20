@@ -4,6 +4,7 @@ using Connectedness.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace Connectedness.API.Controllers
 {
@@ -19,7 +20,7 @@ namespace Connectedness.API.Controllers
         public async Task<IActionResult> Login(UserLoginDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u=> u.Email == dto.Email);
-            if (user == null || user.PasswordHash != dto.Password) {
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) {
                 return Unauthorized("Invalid Email or Password. Please try again.");
             }
             return Ok(new {message = "Login successful!", userId = user.UserId});
@@ -34,10 +35,11 @@ namespace Connectedness.API.Controllers
             {
                 return BadRequest("Email is already registered");
             }
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             var newUser = new User() { 
             FullName = dto.FullName,
             Email = dto.Email,
-            PasswordHash = dto.Password, // Note: This should be hashed in production!
+            PasswordHash = hashedPassword,
             Gender = dto.Gender,
             };
             _context.Users.Add(newUser);
