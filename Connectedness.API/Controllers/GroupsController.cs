@@ -9,14 +9,10 @@ namespace Connectedness.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class GroupsController : ControllerBase
+    public class GroupsController(AppDbContext context) : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _context = context;
 
-        public GroupsController(AppDbContext context)
-        {
-            _context = context;
-        }
         [HttpPost("create")]
         public IActionResult CreateGroup (GroupCreateDto dto)
         {
@@ -25,7 +21,7 @@ namespace Connectedness.API.Controllers
                 GroupName = dto.GroupName,
                 CreatedAt = DateTime.UtcNow,
                 CreatedByUserId = dto.CreatorUserId,
-                GroupMembers = new List<GroupMember>()
+                GroupMembers = []
             };
             var uniqueMemberIds = dto.MemberUserIds.Prepend(dto.CreatorUserId).ToList().Distinct();
             foreach (var memberId in uniqueMemberIds)

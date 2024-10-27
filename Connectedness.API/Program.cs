@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Xml;
+using Connectedness.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var JwtKey = builder.Configuration["Jwt:Key"];
@@ -28,6 +29,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false
     };
 });
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddControllers(); // Add if you're using controllers
 builder.Services.AddEndpointsApiExplorer(); // Needed for minimal APIs and Swagger
 builder.Services.AddSwaggerGen(c =>

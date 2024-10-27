@@ -5,17 +5,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using Connectedness.API.Services;
 
 namespace Connectedness.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController: ControllerBase {
-        private readonly AppDbContext _context;
-        public UsersController(AppDbContext context) {
-            _context = context; 
-       }
-
+    public class UsersController(AppDbContext context, JwtService jwtService): ControllerBase {
+        private readonly AppDbContext _context = context;
+        private readonly JwtService _jwtService = jwtService;
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto dto)
         {
@@ -23,7 +21,8 @@ namespace Connectedness.API.Controllers
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) {
                 return Unauthorized("Invalid Email or Password. Please try again.");
             }
-            return Ok(new {message = "Login successful!", userId = user.UserId});
+            var token = _jwtService.GenerateToken(user);
+            return Ok(new {message = "Login successful!", userId = user.UserId, token});
         }
 
         [HttpPost("register")]
@@ -64,7 +63,7 @@ namespace Connectedness.API.Controllers
                                  member.User.Email
                              }).ToList()
                          }).ToList();
-            if (!groups.Any())
+            if (groups.Count == 0)
             {
                 return NotFound("User doesn't belong to any group.");
             }
