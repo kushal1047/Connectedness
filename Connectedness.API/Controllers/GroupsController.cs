@@ -4,9 +4,12 @@ using Connectedness.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Connectedness.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class GroupsController(AppDbContext context) : ControllerBase
@@ -16,14 +19,15 @@ namespace Connectedness.API.Controllers
         [HttpPost("create")]
         public IActionResult CreateGroup (GroupCreateDto dto)
         {
+            var creatorUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var group = new Group()
             {
                 GroupName = dto.GroupName,
                 CreatedAt = DateTime.UtcNow,
-                CreatedByUserId = dto.CreatorUserId,
+                CreatedByUserId = creatorUserId,
                 GroupMembers = []
             };
-            var uniqueMemberIds = dto.MemberUserIds.Prepend(dto.CreatorUserId).ToList().Distinct();
+            var uniqueMemberIds = dto.MemberUserIds.Prepend(creatorUserId).ToList().Distinct();
             foreach (var memberId in uniqueMemberIds)
             {
                 group.GroupMembers.Add(new GroupMember { UserId = memberId});

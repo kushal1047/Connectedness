@@ -39,6 +39,29 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Connectedness API",
         Version = "v1"
     });
+    c.AddSecurityDefinition("Bearer", new()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then token in the text input below. /n/nExample: Bearer abcdef123456"
+
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement{ 
+        {
+            new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                },
+        Array.Empty<String>()
+        }
+    });
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>

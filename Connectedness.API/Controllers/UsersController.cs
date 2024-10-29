@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 using Connectedness.API.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Connectedness.API.Controllers
 {
@@ -19,7 +21,7 @@ namespace Connectedness.API.Controllers
         {
             var user = await _context.Users.FirstOrDefaultAsync(u=> u.Email == dto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) {
-                return Unauthorized("Invalid Email or Password. Please try again.");
+                return BadRequest("Invalid Email or Password. Please try again.");
             }
             var token = _jwtService.GenerateToken(user);
             return Ok(new {message = "Login successful!", userId = user.UserId, token});
@@ -46,9 +48,11 @@ namespace Connectedness.API.Controllers
             return Ok(new { message= "User registeration successful!", userId= newUser.UserId });
         }
 
-        [HttpGet("{userId}/groups")]
-        public IActionResult GetGroupsForUser(int userId)
+        [Authorize]
+        [HttpGet("groups")]
+        public IActionResult GetGroupsForUser()
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var groups = _context.GroupMembers
                          .Where(gm => gm.UserId == userId)
                          .Select(gm => new
