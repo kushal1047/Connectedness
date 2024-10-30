@@ -115,7 +115,7 @@ namespace Connectedness.API.Controllers
             }
             if (userId != group.CreatedByUserId)
             {
-                return StatusCode(403, "Only group admin can delete this group.");
+                return StatusCode(403, "Only group admin can delete this group");
             }
             _context.GroupMembers.RemoveRange(group.GroupMembers);
             _context.Groups.Remove(group);
