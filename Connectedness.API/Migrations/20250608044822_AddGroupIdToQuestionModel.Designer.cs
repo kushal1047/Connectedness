@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Connectedness.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250529010111_AddCreatorUserIdToGroup")]
-    partial class AddCreatorUserIdToGroup
+    [Migration("20250608044822_AddGroupIdToQuestionModel")]
+    partial class AddGroupIdToQuestionModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -118,7 +118,18 @@ namespace Connectedness.API.Migrations
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Options")
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("IncorrectOption1")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("IncorrectOption2")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("IncorrectOption3")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -129,6 +140,8 @@ namespace Connectedness.API.Migrations
                     b.HasKey("QuestionId");
 
                     b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("Questions");
                 });
@@ -219,7 +232,15 @@ namespace Connectedness.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Connectedness.API.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("Connectedness.API.Models.Group", b =>

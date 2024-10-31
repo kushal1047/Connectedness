@@ -148,5 +148,22 @@ namespace Connectedness.API.Controllers
             _context.Entry(group).Reference(group => group.CreatedByUser).Load();
             return Ok(new { message= $"Group ownership is transfered successfully. New group owner is {group.CreatedByUser!.FullName}"});
         }
+
+        [HttpPost("{groupId}/join-group")]
+        public IActionResult JoinGroup(int groupId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var group = _context.Groups
+                        .Include(group => group.GroupMembers)
+                        .FirstOrDefault(group=> group.GroupId == groupId);
+            if (group == null) { return NotFound("Group not found."); }
+            if (group.GroupMembers.Any(member=>member.UserId == userId))
+            {
+                return BadRequest("User is already a member of this group.");
+            }
+            group.GroupMembers.Add(new GroupMember {UserId = userId });
+            _context.SaveChanges();
+            return Ok(new {message="User has successfully joined the group."});
+        }
     }
 }

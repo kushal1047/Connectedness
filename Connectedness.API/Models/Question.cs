@@ -12,6 +12,5 @@ namespace Connectedness.API.Models
         public required string IncorrectOption3 { get; set; }
         public int GroupId { get; set; }
         public Group? Group { get; set; }
-
     }
 }
