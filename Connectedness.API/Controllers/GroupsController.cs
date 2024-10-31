@@ -89,7 +89,7 @@ namespace Connectedness.API.Controllers
             {
                 return NotFound("Unable to find group.");
             }
-            var user = group.GroupMembers.Where(member=> member.UserId == userId).FirstOrDefault();
+            var user = group.GroupMembers.FirstOrDefault(member => member.UserId == userId);
             if (user == null)
             {
                 return NotFound("User is not a member of this group.");

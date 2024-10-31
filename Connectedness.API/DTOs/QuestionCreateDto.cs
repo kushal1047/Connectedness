@@ -7,6 +7,6 @@ namespace Connectedness.API.DTOs
         public required string IncorrectOption1 { get; set; }
         public required string IncorrectOption2 { get; set; }
         public required string IncorrectOption3 { get; set; }
-        public required string GroupId { get; set; }
+        public required int GroupId { get; set; }
     }
 }
