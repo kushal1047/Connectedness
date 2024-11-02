@@ -45,5 +45,33 @@ namespace Connectedness.API.Controllers
             return Ok(new {message="Question created successfully."});
         }
 
+        [HttpGet("group/{groupId}")]
+        public IActionResult GetGroupQuestions(int groupId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isGroupMember = _context.GroupMembers.Any(member => member.GroupId == groupId && member.UserId == userId);
+            if (!isGroupMember)
+            {
+                return StatusCode(403, new { message = "User is not a member of this group." });
+            }
+            var questions = _context.Questions
+                            .Include(question=>question.CreatedByUser)
+                            .Where(question => question.GroupId == groupId)
+                            .Select(question => new
+                            {
+                                question.QuestionId,
+                                question.Text,
+                                createdBy = new { question.CreatedByUserId, question.CreatedByUser!.FullName },
+                                options = new List<string>
+                                {
+                                    question.CorrectAnswer,
+                                    question.IncorrectOption1,
+                                    question.IncorrectOption2,
+                                    question.IncorrectOption3
+                                }
+                            }).ToList();
+            return Ok(questions);
+        }
+
     }
 }
