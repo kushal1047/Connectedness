@@ -45,7 +45,7 @@ namespace Connectedness.API.Controllers
             };
             _context.Users.Add(newUser);
             _context.SaveChanges();
-            return Ok(new { message= "User registeration successful!", userId= newUser.UserId });
+            return Ok(new { message= "User registeration successful!" });
         }
 
         [Authorize]

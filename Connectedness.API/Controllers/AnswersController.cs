@@ -46,6 +46,37 @@ namespace Connectedness.API.Controllers
             _context.SaveChanges();
             return Ok(new {message= "Answer submitted successfully", isCorrect = answer.IsCorrect });
         }
+
+        [HttpGet("{groupId}/user-result")]
+        public IActionResult GetUserResult(int groupId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isMember = _context.GroupMembers.Any(member=>member.GroupId == groupId && member.UserId == userId);
+            if (!isMember)
+            {
+                return StatusCode(403,"User is not a member of this group.");
+            }
+            var questionIds = _context.Questions.Where(question=> question.GroupId == groupId).Select(question=>question.QuestionId).ToList();
+            var userAnswers = _context.Answers.Include(answer=> answer.Question).Where(answer => questionIds.Contains(answer.QuestionId) && answer.AnsweredByUserId == userId).ToList();
+            var totalAnswered = userAnswers.Count;
+            var correctAnswers = userAnswers.Count(answer=>answer.IsCorrect);
+            var userScore = totalAnswered > 0 ? $"{(correctAnswers * 100 / totalAnswered)} %" : $"0 %";
+            var userResult = new { 
+               totalAnswered,
+               correctAnswers,
+               userScore,
+               answersList = userAnswers.Select(answer=> new
+               {
+                   answer.QuestionId,
+                   answer.Question!.Text,
+                   answer.SelectedAnswer,
+                   answer.Question.CorrectAnswer,
+                   answer.IsCorrect
+               }).ToList()
+            };
+            return Ok(userResult);
+
+        }
     }
 }
 
