@@ -10,7 +10,7 @@ namespace Connectedness.API.Models
         public required string IncorrectOption1 { get; set; }
         public required string IncorrectOption2 { get; set; }
         public required string IncorrectOption3 { get; set; }
-        public int GroupId { get; set; }
+        public required int GroupId { get; set; }
         public Group? Group { get; set; }
     }
 }

@@ -60,7 +60,7 @@ namespace Connectedness.API.Controllers
             var userAnswers = _context.Answers.Include(answer=> answer.Question).Where(answer => questionIds.Contains(answer.QuestionId) && answer.AnsweredByUserId == userId).ToList();
             var totalAnswered = userAnswers.Count;
             var correctAnswers = userAnswers.Count(answer=>answer.IsCorrect);
-            var userScore = totalAnswered > 0 ? $"{(correctAnswers * 100 / totalAnswered)} %" : $"0 %";
+            var userScore = totalAnswered > 0 ? $"{(correctAnswers * 100 / totalAnswered)}%" : $"0%";
             var userResult = new { 
                totalAnswered,
                correctAnswers,
@@ -70,12 +70,45 @@ namespace Connectedness.API.Controllers
                    answer.QuestionId,
                    answer.Question!.Text,
                    answer.SelectedAnswer,
-                   answer.Question.CorrectAnswer,
-                   answer.IsCorrect
+                   answer.IsCorrect,
+                   answer.Question.CorrectAnswer
                }).ToList()
             };
             return Ok(userResult);
 
+        }
+        [HttpGet("{groupId}/group-result")]
+        public async Task<IActionResult> GetGroupResults(int groupId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isMember = await _context.GroupMembers.AnyAsync(member=>member.GroupId == groupId && member.UserId == userId);
+            if (!isMember)
+            {
+                return StatusCode(403, "Only group members can view the result");
+            }
+            var memberIds = await _context.GroupMembers.Where(member => member.GroupId == groupId).Select(member=> member.UserId).ToListAsync();
+            var questionIds = await _context.Questions.Where(question=>question.GroupId == groupId).Select(question=>question.QuestionId).ToListAsync();
+            var answers = await _context.Answers.Include(answer=>answer.Question).Where(answer => questionIds.Contains(answer.QuestionId) && memberIds.Contains(answer.AnsweredByUserId)).ToListAsync();
+            var validAnswers = answers.Where(answer=>answer.AnsweredByUserId != answer.Question!.CreatedByUserId).ToList();
+            var totalAnswered = validAnswers.Count;
+            var correctAnswers = validAnswers.Count(answer=>answer.IsCorrect);
+            var totalExpectedAnswers = questionIds.Count * (memberIds.Count - 1);
+            var groupScore = totalAnswered > 0 ? $"{correctAnswers * 100 / totalExpectedAnswers}%" : "0%";
+            var groupResult = new {
+                totalAnswered,
+                correctAnswers,
+                totalExpectedAnswers,
+                groupScore,
+                memberAnswers = validAnswers.Select(answer => new
+                {
+                    answer.QuestionId,
+                    answer.Question!.Text,
+                    answer.SelectedAnswer,
+                    answer.IsCorrect,
+                    answer.Question.CorrectAnswer
+                }).ToList()
+            };
+            return Ok(groupResult);
         }
     }
 }
