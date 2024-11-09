@@ -17,7 +17,7 @@ namespace Connectedness.API.Controllers
         private readonly AppDbContext _context = context;
 
         [HttpPost("create")]
-        public IActionResult CreateGroup (GroupCreateDto dto)
+        public IActionResult CreateGroup(GroupCreateDto dto)
         {
             var creatorUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var group = new Group()
@@ -30,23 +30,23 @@ namespace Connectedness.API.Controllers
             var uniqueMemberIds = dto.MemberUserIds.Prepend(creatorUserId).ToList().Distinct();
             foreach (var memberId in uniqueMemberIds)
             {
-                group.GroupMembers.Add(new GroupMember { UserId = memberId});
+                group.GroupMembers.Add(new GroupMember { UserId = memberId });
             }
             _context.Groups.Add(group);
             _context.SaveChanges();
-            return Ok(new {message = "Group Created Successfully!", groupId = group.GroupId });
+            return Ok(new { message = "Group Created Successfully!", groupId = group.GroupId });
         }
 
         [HttpGet("{id}")]
         public IActionResult GetGroup(int id)
         {
             var group = _context.Groups.Where(group => group.GroupId == id)
-                        .Select(group => new { 
+                        .Select(group => new {
                             group.GroupId,
                             group.GroupName,
                             group.CreatedAt,
                             CreatedBy = group.CreatedByUser!.FullName,
-                            Members = group.GroupMembers.Select(member=> new
+                            Members = group.GroupMembers.Select(member => new
                             {
                                 member.UserId,
                                 member.User!.FullName,
@@ -62,7 +62,7 @@ namespace Connectedness.API.Controllers
 
         [HttpPut("{groupId}/update-name")]
         public IActionResult UpdateGroupName(int groupId, [FromBody] string newName, [FromQuery] int userId)
-        {   if (string.IsNullOrWhiteSpace(newName))
+        { if (string.IsNullOrWhiteSpace(newName))
             {
                 return BadRequest("Group name cannot be empty.");
             }
@@ -76,14 +76,14 @@ namespace Connectedness.API.Controllers
             }
             group.GroupName = newName;
             _context.SaveChanges();
-            return Ok(new {message = "Group name updated successfully.", group});
+            return Ok(new { message = "Group name updated successfully.", group });
 
         }
         [HttpDelete("{groupId}/leave/{userId}")]
         public IActionResult LeaveGroup(int groupId, int userId)
         {
             var group = _context.Groups.
-                Include(group=>group.GroupMembers).
+                Include(group => group.GroupMembers).
                 Where(group => group.GroupId == groupId).FirstOrDefault();
             if (group == null)
             {
@@ -107,8 +107,8 @@ namespace Connectedness.API.Controllers
         public IActionResult DeleteGroup(int groupId, [FromQuery] int userId)
         {
             var group = _context.Groups
-                .Include(group=>group.GroupMembers)
-                .FirstOrDefault(group=> group.GroupId == groupId);
+                .Include(group => group.GroupMembers)
+                .FirstOrDefault(group => group.GroupId == groupId);
             if (group == null)
             {
                 return NotFound("Group not found.");
@@ -120,7 +120,7 @@ namespace Connectedness.API.Controllers
             _context.GroupMembers.RemoveRange(group.GroupMembers);
             _context.Groups.Remove(group);
             _context.SaveChanges();
-            return Ok(new {message = "Group deleted successfully."});
+            return Ok(new { message = "Group deleted successfully." });
 
         }
 
@@ -135,7 +135,7 @@ namespace Connectedness.API.Controllers
             {
                 return NotFound("Group Not Found!");
             }
-            if (!(group.GroupMembers.Any(member=>member.UserId == newOwnerId)))
+            if (!(group.GroupMembers.Any(member => member.UserId == newOwnerId)))
             {
                 return BadRequest("User can transfer ownership to a group member only.");
             }
@@ -146,7 +146,7 @@ namespace Connectedness.API.Controllers
             group.CreatedByUserId = newOwnerId;
             _context.SaveChanges();
             _context.Entry(group).Reference(group => group.CreatedByUser).Load();
-            return Ok(new { message= $"Group ownership is transfered successfully. New group owner is {group.CreatedByUser!.FullName}"});
+            return Ok(new { message = $"Group ownership is transfered successfully. New group owner is {group.CreatedByUser!.FullName}" });
         }
 
         [HttpPost("{groupId}/join-group")]
@@ -155,15 +155,69 @@ namespace Connectedness.API.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var group = _context.Groups
                         .Include(group => group.GroupMembers)
-                        .FirstOrDefault(group=> group.GroupId == groupId);
+                        .FirstOrDefault(group => group.GroupId == groupId);
             if (group == null) { return NotFound("Group not found."); }
-            if (group.GroupMembers.Any(member=>member.UserId == userId))
+            if (group.GroupMembers.Any(member => member.UserId == userId))
             {
                 return BadRequest("User is already a member of this group.");
             }
-            group.GroupMembers.Add(new GroupMember {UserId = userId });
+            group.GroupMembers.Add(new GroupMember { UserId = userId });
             _context.SaveChanges();
-            return Ok(new {message="User has successfully joined the group."});
+            return Ok(new { message = "User has successfully joined the group." });
         }
+
+        [HttpGet("{groupId}/group-summary")]
+        public async Task<IActionResult> GetGroupSummary(int groupId)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isMember = await _context.GroupMembers
+                            .AnyAsync(member => member.GroupId == groupId && member.UserId == userId);
+            if (!isMember)
+            {
+                return StatusCode(403, "Only group members can view group summary.");
+            }
+            var members = await _context.GroupMembers
+                           .Where(member => member.GroupId == groupId)
+                           .Select(member => member.User)
+                           .ToListAsync();
+            var questions = await _context.Questions
+                               .Where(question => question.GroupId == groupId)
+                               .ToListAsync();
+            var questionIds = questions.Select(question => question.QuestionId).ToList();
+            var answers = await _context.Answers
+                            .Include(answer => answer.Question)
+                            .Where(answer => questionIds.Contains(answer.QuestionId) && members.Select(member => member.UserId).Contains(answer.AnsweredByUserId))
+                            .ToListAsync();
+            var validAnswers = answers.Where(answer=>answer.AnsweredByUserId != answer.Question.CreatedByUserId).ToList();
+            var totalPercentage = 0;
+            var resultList = new List<object>();
+            foreach (var member in members)
+            {
+                var userAnswers = validAnswers.Where(answer => answer.AnsweredByUserId == member.UserId).ToList();
+                var correctAnswers = userAnswers.Count(answer=>answer.IsCorrect);
+                var totalAnswered = userAnswers.Count;
+                var percentage = totalAnswered > 0 ? correctAnswers * 100 / totalAnswered : 0;
+                totalPercentage += percentage;
+                var totalQuestions = questions.Where(question => question.CreatedByUserId != member.UserId).ToList().Count;
+                resultList.Add(new
+                {
+                    userId = member.UserId,
+                    name = member.FullName,
+                    totalAnswered,
+                    correctAnswers,
+                    percentage = $"{percentage}%",
+                    fullyParticipated = totalAnswered == totalQuestions
+                });
+            }
+            var groupPercentage = members.Count>0? $"{totalPercentage / members.Count}%": "0%";
+            var groupSummary = new { 
+            groupId,
+            groupPercentage,
+            members = resultList,
+            };
+            return Ok(groupSummary);
+
+        }
+
     }
 }
