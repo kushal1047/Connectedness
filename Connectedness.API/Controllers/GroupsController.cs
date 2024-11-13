@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Update.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace Connectedness.API.Controllers
 {
@@ -181,39 +182,60 @@ namespace Connectedness.API.Controllers
                            .Select(member => member.User)
                            .ToListAsync();
             var questions = await _context.Questions
+                                .Include(question=> question.CreatedByUser)
                                .Where(question => question.GroupId == groupId)
                                .ToListAsync();
             var questionIds = questions.Select(question => question.QuestionId).ToList();
             var answers = await _context.Answers
                             .Include(answer => answer.Question)
-                            .Where(answer => questionIds.Contains(answer.QuestionId) && members.Select(member => member.UserId).Contains(answer.AnsweredByUserId))
+                            .Include(answer=>answer.AnsweredByUser)
+                            .Where(answer => questionIds.Contains(answer.QuestionId) && members.Select(member => member!.UserId).Contains(answer.AnsweredByUserId))
                             .ToListAsync();
-            var validAnswers = answers.Where(answer=>answer.AnsweredByUserId != answer.Question.CreatedByUserId).ToList();
+            var validAnswers = answers.Where(answer=>answer.AnsweredByUserId != answer.Question?.CreatedByUserId).ToList();
             var totalPercentage = 0;
-            var resultList = new List<object>();
+            var membersList = new List<object>();
             foreach (var member in members)
             {
-                var userAnswers = validAnswers.Where(answer => answer.AnsweredByUserId == member.UserId).ToList();
+                var userAnswers = validAnswers.Where(answer => answer.AnsweredByUserId == member?.UserId).ToList();
                 var correctAnswers = userAnswers.Count(answer=>answer.IsCorrect);
                 var totalAnswered = userAnswers.Count;
                 var percentage = totalAnswered > 0 ? correctAnswers * 100 / totalAnswered : 0;
                 totalPercentage += percentage;
-                var totalQuestions = questions.Where(question => question.CreatedByUserId != member.UserId).ToList().Count;
-                resultList.Add(new
+                var totalQuestions = questions.Where(question => question.CreatedByUserId != member?.UserId).ToList().Count;
+                membersList.Add(new
                 {
-                    userId = member.UserId,
-                    name = member.FullName,
+                    userId = member?.UserId,
+                    name = member?.FullName,
                     totalAnswered,
                     correctAnswers,
                     percentage = $"{percentage}%",
                     fullyParticipated = totalAnswered == totalQuestions
                 });
             }
+            var questionsSummary = questions.Select(question =>
+            {
+                var answersToThisQuestion = validAnswers.Where(answer => answer.QuestionId == question.QuestionId)
+                                            .Select(answer => new {
+                                            answer.AnsweredByUserId,
+                                            answer.AnsweredByUser?.FullName,
+                                            answer.SelectedAnswer,
+                                            answer.IsCorrect
+                                            }).ToList();
+                return new
+                {
+                    questionId = question.QuestionId,
+                    questionText = question.Text,
+                    createdByUserId = question.CreatedByUserId,
+                    createdByName = question.CreatedByUser?.FullName,
+                    answers = answersToThisQuestion
+                };
+            }).ToList();
             var groupPercentage = members.Count>0? $"{totalPercentage / members.Count}%": "0%";
             var groupSummary = new { 
             groupId,
             groupPercentage,
-            members = resultList,
+            members = membersList,
+            questions = questionsSummary
             };
             return Ok(groupSummary);
 
