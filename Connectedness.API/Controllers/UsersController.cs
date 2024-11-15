@@ -21,7 +21,7 @@ namespace Connectedness.API.Controllers
         {
             var user = await _context.Users.FirstOrDefaultAsync(u=> u.Email == dto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) {
-                return BadRequest("Invalid Email or Password. Please try again.");
+                return BadRequest(new { message = "Invalid Email or Password. Please try again." });
             }
             var token = _jwtService.GenerateToken(user);
             return Ok(new {message = "Login successful!", userId = user.UserId, token});

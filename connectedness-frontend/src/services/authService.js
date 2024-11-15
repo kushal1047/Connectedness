@@ -1,6 +1,6 @@
 const API_BASE = "https://localhost:5191/api/users";
 
-export async function Login(email, password) {
+export async function login(email, password) {
   const res = await fetch(`${API_BASE}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -10,7 +10,7 @@ export async function Login(email, password) {
   return res.json();
 }
 
-export async function Register(fullName, email, gender, password) {
+export async function register(fullName, email, gender, password) {
   const res = await fetch(`${API_BASE}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
