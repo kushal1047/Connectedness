@@ -28,13 +28,13 @@ namespace Connectedness.API.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register(UserRegisterDto dto)
+        public async Task<IActionResult> Register(UserRegisterDto dto)
         {
             // checks whether the user email is previously registered.
-            var existingUser = _context.Users.FirstOrDefault(u=> u.Email == dto.Email);
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u=> u.Email == dto.Email);
             if (existingUser != null)
             {
-                return BadRequest("Email is already registered");
+                return BadRequest(new { message = "Email is already registered" });
             }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             var newUser = new User() { 
@@ -69,7 +69,7 @@ namespace Connectedness.API.Controllers
                          }).ToList();
             if (groups.Count == 0)
             {
-                return NotFound("User doesn't belong to any group.");
+                return NotFound(new {message= "User doesn't belong to any group."});
             }
             return Ok(groups);
         }
