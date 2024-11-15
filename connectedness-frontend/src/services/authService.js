@@ -1,4 +1,4 @@
-const API_BASE = "https://localhost:5191/api/users";
+const API_BASE = "http://localhost:5291/api/Users";
 
 export async function login(email, password) {
   const res = await fetch(`${API_BASE}/login`, {
@@ -6,11 +6,14 @@ export async function login(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ Email: email, Password: password }),
   });
-  if (!res.ok) throw new Error("Login failed!");
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Login failed!");
+  }
   return res.json();
 }
 
-export async function register(fullName, email, gender, password) {
+export async function register(fullName, gender, email, password) {
   const res = await fetch(`${API_BASE}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21,6 +24,9 @@ export async function register(fullName, email, gender, password) {
       Password: password,
     }),
   });
-  if (!res.ok) throw new Error("Registeration failed!");
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Registeration failed!");
+  }
   return res.json();
 }

@@ -13,14 +13,14 @@ export default function Login() {
       const { token } = await login(email, password);
       localStorage.setItem("token", token);
       alert("Login successful.");
-      navigate("./dashboard");
+      /* navigate("/dashboard");*/
     } catch (error) {
       alert(error.message);
     }
   };
   return (
     <div className="max-w-md mx-auto mt-10 p-4 border rounded-lg shadow">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="email"
