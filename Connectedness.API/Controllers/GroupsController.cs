@@ -1,4 +1,4 @@
-using Connectedness.API.Data;
+﻿using Connectedness.API.Data;
 using Connectedness.API.Models;
 using Connectedness.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -193,7 +193,7 @@ namespace Connectedness.API.Controllers
                             .ToListAsync();
             var validAnswers = answers.Where(answer=>answer.AnsweredByUserId != answer.Question?.CreatedByUserId).ToList();
             var totalPercentage = 0;
-            var membersList = new List<object>();
+            var memberSummary = new List<object>();
             foreach (var member in members)
             {
                 var userAnswers = validAnswers.Where(answer => answer.AnsweredByUserId == member?.UserId).ToList();
@@ -202,14 +202,24 @@ namespace Connectedness.API.Controllers
                 var percentage = totalAnswered > 0 ? correctAnswers * 100 / totalAnswered : 0;
                 totalPercentage += percentage;
                 var totalQuestions = questions.Where(question => question.CreatedByUserId != member?.UserId).ToList().Count;
-                membersList.Add(new
+                var compatibilityLevel = percentage switch
+                {
+                    >= 80 => "High",
+                    >= 60 => "Medium",
+                    >= 40 => "Low",
+                    _ => "Very Low"
+                };
+                var participationStatus = totalQuestions == totalAnswered ? "Full" : "Partial";
+                memberSummary.Add(new
                 {
                     userId = member?.UserId,
                     name = member?.FullName,
                     totalAnswered,
                     correctAnswers,
                     percentage = $"{percentage}%",
-                    fullyParticipated = totalAnswered == totalQuestions
+                    fullyParticipated = totalAnswered == totalQuestions,
+                    compatibilityLevel,
+                    participationStatus,
                 });
             }
             var questionsSummary = questions.Select(question =>
@@ -219,7 +229,8 @@ namespace Connectedness.API.Controllers
                                             answer.AnsweredByUserId,
                                             answer.AnsweredByUser?.FullName,
                                             answer.SelectedAnswer,
-                                            answer.IsCorrect
+                                            answer.IsCorrect,
+                                            statusIcon = answer.IsCorrect? "✅" :"❌",
                                             }).ToList();
                 return new
                 {
@@ -234,7 +245,7 @@ namespace Connectedness.API.Controllers
             var groupSummary = new { 
             groupId,
             groupPercentage,
-            members = membersList,
+            members = memberSummary,
             questions = questionsSummary
             };
             return Ok(groupSummary);
