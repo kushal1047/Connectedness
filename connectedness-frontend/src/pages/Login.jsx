@@ -13,7 +13,7 @@ export default function Login() {
       const { token } = await login(email, password);
       localStorage.setItem("token", token);
       alert("Login successful.");
-      /* navigate("/dashboard");*/
+      navigate("/dashboard");
     } catch (error) {
       alert(error.message);
     }
