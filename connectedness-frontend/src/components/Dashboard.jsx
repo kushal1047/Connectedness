@@ -42,16 +42,16 @@ export default function Dashboard() {
           Your Groups
         </h1>
         <ul className="space-y-4">
-          {groups.map((group) => {
+          {groups.map((group) => (
             <li
               key={group.id}
-              className="bg-white p-5 shadow hover:shadow-md transition-shadow border-l-4 border-blue-500"
+              className="bg-white p-5 shadow hover:shadow-md transition-shadow border-l-4 border-blue-500 rounded-2xl"
             >
               <span className="text-lg font-medium text-gray-700">
                 {group.name}
               </span>
-            </li>;
-          })}
+            </li>
+          ))}
         </ul>
       </div>
     </div>
