@@ -13,6 +13,9 @@ export default function Dashboard() {
         { id: 1, name: "Family" },
         { id: 2, name: "Friends" },
         { id: 3, name: "Football" },
+        { id: 4, name: "Family" },
+        { id: 5, name: "Friends" },
+        { id: 6, name: "Football" },
       ]);
       setIsLoading(false);
     }, 1000);
@@ -36,23 +39,30 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8 bg-gray-100">
-      <div className="max-w-3xl mx-auto ">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+    <div className="min-h-screen px-4 py-8 bg-gradient-to-br from-red-50 to-red-100">
+      <div className="max-w-5xl mx-auto ">
+        <h1 className="text-3xl font-bold text-gray-800 mb-10 text-center">
           Your Groups
         </h1>
-        <ul className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {groups.map((group) => (
-            <li
+            <div
               key={group.id}
-              className="bg-white p-5 shadow hover:shadow-md transition-shadow border-l-4 border-blue-500 rounded-2xl"
+              className="rounded-2xl shadow-lg bg-white hover:shadow-xl flex flex-col justify-between transition-shadow p-6"
             >
-              <span className="text-lg font-medium text-gray-700">
+              <h2 className="text-xl text-gray-700 font-semibold mb-2">
                 {group.name}
-              </span>
-            </li>
+              </h2>
+              <p className="text-sm text-gray-500 mb-4">Group ID: {group.id}</p>
+              <a
+                href={`groups/${group.id}`}
+                className="bg-indigo-600 text-center hover:bg-indigo-700 transition duration-200 rounded-lg px-4 py-2 text-white font-semibold"
+              >
+                View Group
+              </a>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
