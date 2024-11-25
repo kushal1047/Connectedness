@@ -55,7 +55,7 @@ export default function Dashboard() {
               </h2>
               <p className="text-sm text-gray-500 mb-4">Group ID: {group.id}</p>
               <a
-                href={`groups/${group.id}`}
+                href={`group/${group.id}`}
                 className="bg-indigo-600 text-center hover:bg-indigo-700 transition duration-200 rounded-lg px-4 py-2 text-white font-semibold"
               >
                 View Group

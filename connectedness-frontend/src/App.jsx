@@ -7,6 +7,7 @@ import {
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./components/Dashboard";
+import GroupDetails from "./pages/GroupDetails";
 function App() {
   return (
     <Router>
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         {/* Protected Routes under here */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/group/:groupId" element={<GroupDetails />} />
       </Routes>
     </Router>
   );
