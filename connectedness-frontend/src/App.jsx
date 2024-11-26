@@ -10,6 +10,7 @@ import Dashboard from "./components/Dashboard";
 import GroupDetails from "./pages/GroupDetails";
 import TestPage from "./pages/testPage";
 import CreateQuestions from "./pages/CreateQuestions";
+import AnswerQuestions from "./pages/AnswerQuestions";
 function App() {
   return (
     <Router>
@@ -22,6 +23,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/group/:groupId" element={<GroupDetails />} />
         <Route path="/create-questions" element={<CreateQuestions />} />
+        <Route path="/answer-questions" element={<AnswerQuestions />} />
         <Route path="/test" element={<TestPage />} />
       </Routes>
     </Router>

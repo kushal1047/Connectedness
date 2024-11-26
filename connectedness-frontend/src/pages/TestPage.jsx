@@ -1,72 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function TestPage() {
-  const [questions, setQuestions] = useState([{ text: "", correctAnswer: "" }]);
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
 
-  const addQuestion = () => {
-    if (questions.length < 10) {
-      setQuestions([...questions, { text: "", correctAnswer: "" }]);
-    }
+  // Mock data fetch (replace with actual API later)
+  useEffect(() => {
+    const fetchedQuestions = [
+      {
+        questionId: 1,
+        text: "What is your favorite color?",
+        options: ["Red", "Blue", "Green", "Yellow"],
+      },
+      { questionId: 2, text: "Pick a number", options: ["1", "2", "3", "4"] },
+    ];
+    setQuestions(fetchedQuestions);
+  }, []);
+
+  const handleSelect = (questionId, selectedAnswer) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: selectedAnswer }));
   };
 
-  const handleInputChange = (index, field, value) => {
-    const updated = [...questions];
-    questions[index][field] = value;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted Questions:", questions);
-    // TODO: Replace with API call
+  const handleSubmit = () => {
+    const payload = Object.entries(answers).map(
+      ([questionId, selectedAnswer]) => ({
+        questionId: parseInt(questionId),
+        selectedAnswer,
+      })
+    );
+    console.log("Submitted Answers:", payload);
+    // TODO: Replace with POST to backend
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center">
-          Create Questions (Max 10)
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Answer Questions
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {questions.map((q, idx) => (
-            <div key={idx} className="border p-4 rounded-lg bg-gray-100">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Question {idx + 1}
-              </label>
-              <input
-                type="text"
-                placeholder="Enter your question"
-                value={q.text}
-                onChange={(e) => handleInputChange(idx, "text", e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300 mb-2"
-              />
-              <input
-                type="text"
-                placeholder="Enter correct answer"
-                value={q.correctAnswer}
-                onChange={(e) =>
-                  handleInputChange(idx, "correctAnswer", e.target.value)
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
-              />
+        {questions.map((q) => (
+          <div
+            key={q.questionId}
+            className="mb-6 border p-4 rounded-lg bg-gray-100"
+          >
+            <p className="text-lg font-medium mb-3">{q.text}</p>
+            <div className="grid grid-cols-2 gap-3">
+              {q.options.map((option) => (
+                <label
+                  key={option}
+                  className={`cursor-pointer px-4 py-2 rounded-lg border text-center ${
+                    answers[q.questionId] === option
+                      ? "bg-blue-500 text-white"
+                      : "bg-white hover:bg-blue-100"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question-${q.questionId}`}
+                    value={option}
+                    className="hidden"
+                    onChange={() => handleSelect(q.questionId, option)}
+                  />
+                  {option}
+                </label>
+              ))}
             </div>
-          ))}
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={addQuestion}
-              disabled={questions.length >= 10}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Add Question
-            </button>
-            <button
-              type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Submit
-            </button>
           </div>
-        </form>
+        ))}
+        <button
+          onClick={handleSubmit}
+          className="w-full mt-4 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 text-lg"
+        >
+          Submit Answers
+        </button>
       </div>
     </div>
   );
