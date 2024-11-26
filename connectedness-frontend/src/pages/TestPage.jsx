@@ -1,78 +1,94 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function TestPage() {
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
 
-  // Mock data fetch (replace with actual API later)
+  // Mock fetch (replace with real API)
   useEffect(() => {
-    const fetchedQuestions = [
-      {
-        questionId: 1,
-        text: "What is your favorite color?",
-        options: ["Red", "Blue", "Green", "Yellow"],
-      },
-      { questionId: 2, text: "Pick a number", options: ["1", "2", "3", "4"] },
-    ];
-    setQuestions(fetchedQuestions);
+    const fetchedResult = {
+      groupId: 1,
+      userId: 42,
+      totalAnswered: 8,
+      correctCount: 6,
+      percentage: 75,
+      answers: [
+        {
+          questionId: 101,
+          questionText: "What is 2 + 2?",
+          selectedAnswer: "4",
+          correctAnswer: "4",
+          isCorrect: true,
+        },
+        {
+          questionId: 102,
+          questionText: "Favorite color of sky?",
+          selectedAnswer: "Green",
+          correctAnswer: "Blue",
+          isCorrect: false,
+        },
+      ],
+    };
+    setResult(fetchedResult);
   }, []);
 
-  const handleSelect = (questionId, selectedAnswer) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: selectedAnswer }));
-  };
-
-  const handleSubmit = () => {
-    const payload = Object.entries(answers).map(
-      ([questionId, selectedAnswer]) => ({
-        questionId: parseInt(questionId),
-        selectedAnswer,
-      })
+  if (!result) {
+    return (
+      <div className="text-center py-20 text-gray-500">Loading result...</div>
     );
-    console.log("Submitted Answers:", payload);
-    // TODO: Replace with POST to backend
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          Answer Questions
+          Your Group Results
         </h2>
-        {questions.map((q) => (
-          <div
-            key={q.questionId}
-            className="mb-6 border p-4 rounded-lg bg-gray-100"
-          >
-            <p className="text-lg font-medium mb-3">{q.text}</p>
-            <div className="grid grid-cols-2 gap-3">
-              {q.options.map((option) => (
-                <label
-                  key={option}
-                  className={`cursor-pointer px-4 py-2 rounded-lg border text-center ${
-                    answers[q.questionId] === option
-                      ? "bg-blue-500 text-white"
-                      : "bg-white hover:bg-blue-100"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${q.questionId}`}
-                    value={option}
-                    className="hidden"
-                    onChange={() => handleSelect(q.questionId, option)}
-                  />
-                  {option}
-                </label>
-              ))}
-            </div>
+        <div className="grid grid-cols-2 gap-4 mb-6 text-center">
+          <div className="bg-blue-100 p-4 rounded-lg">
+            <p className="text-xl font-bold">{result.totalAnswered}</p>
+            <p className="text-sm text-gray-700">Questions Answered</p>
           </div>
-        ))}
-        <button
-          onClick={handleSubmit}
-          className="w-full mt-4 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 text-lg"
-        >
-          Submit Answers
-        </button>
+          <div className="bg-green-100 p-4 rounded-lg">
+            <p className="text-xl font-bold">{result.correctCount}</p>
+            <p className="text-sm text-gray-700">Correct Answers</p>
+          </div>
+        </div>
+        <div className="mb-6 text-center">
+          <p className="text-lg font-semibold">
+            Score: <span className="text-green-600">{result.percentage}%</span>
+          </p>
+        </div>
+        <hr className="mb-4" />
+        <div>
+          <h3 className="text-lg font-bold mb-3">Detailed Answers</h3>
+          {result.answers.map((ans) => (
+            <div
+              key={ans.questionId}
+              className={`mb-4 p-4 rounded-lg border ${
+                ans.isCorrect
+                  ? "border-green-300 bg-green-50"
+                  : "border-red-300 bg-red-50"
+              }`}
+            >
+              <p className="font-medium">{ans.questionText}</p>
+              <p className="text-sm mt-1">
+                Your Answer:{" "}
+                <span className="font-semibold">{ans.selectedAnswer}</span>
+              </p>
+              <p className="text-sm">
+                Correct Answer:{" "}
+                <span className="font-semibold">{ans.correctAnswer}</span>
+              </p>
+              <p
+                className={`mt-1 font-semibold ${
+                  ans.isCorrect ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {ans.isCorrect ? "Correct ✅" : "Incorrect ❌"}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import GroupDetails from "./pages/GroupDetails";
 import TestPage from "./pages/testPage";
 import CreateQuestions from "./pages/CreateQuestions";
 import AnswerQuestions from "./pages/AnswerQuestions";
+import ResultView from "./pages/ResultView";
 function App() {
   return (
     <Router>
@@ -24,6 +25,7 @@ function App() {
         <Route path="/group/:groupId" element={<GroupDetails />} />
         <Route path="/create-questions" element={<CreateQuestions />} />
         <Route path="/answer-questions" element={<AnswerQuestions />} />
+        <Route path="/result" element={<ResultView />} />
         <Route path="/test" element={<TestPage />} />
       </Routes>
     </Router>
