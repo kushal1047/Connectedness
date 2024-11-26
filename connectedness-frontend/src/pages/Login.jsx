@@ -1,21 +1,25 @@
 import { useState } from "react";
-import { login } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import api from "../services/axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const { token } = await login(email, password);
-      localStorage.setItem("token", token);
-      alert("Login successful.");
+      const res = await api.post("/users/login", {
+        Email: email,
+        Password: password,
+      });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userId", res.data.userId);
       navigate("/dashboard");
     } catch (error) {
-      alert(error.message);
+      setError(error.response?.data.message || "Login Failed!");
     }
   };
   return (
@@ -59,6 +63,7 @@ export default function Login() {
               className="w-full py-2 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
+          {error && <div className="text-red-600">{error}</div>}
           <button
             type="submit"
             className="bg-green-600 hover:bg-green-700 text-white rounded-lg py-2 px-4 font-semibold transition duration-200"
