@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from "../services/axios";
 
 export default function Dashboard() {
   const [groups, setGroups] = useState([]);

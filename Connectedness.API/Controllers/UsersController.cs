@@ -34,7 +34,7 @@ namespace Connectedness.API.Controllers
             var existingUser = await _context.Users.FirstOrDefaultAsync(u=> u.Email == dto.Email);
             if (existingUser != null)
             {
-                return BadRequest(new { message = "Email is already registered" });
+                return BadRequest(new { message = "Email is already registered!" });
             }
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             var newUser = new User() { 
@@ -45,7 +45,7 @@ namespace Connectedness.API.Controllers
             };
             _context.Users.Add(newUser);
             _context.SaveChanges();
-            return Ok(new { message= "User registeration successful!" });
+            return Ok(new { message= "User registeration successful." });
         }
 
         [Authorize]

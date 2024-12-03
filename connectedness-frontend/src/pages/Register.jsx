@@ -1,22 +1,32 @@
 import { useState } from "react";
 import { register } from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import api from "../services/axios";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
   const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      await register(fullName, gender, email, password);
-      alert("Registered Successfully!");
-      navigate("/login");
+      await api.post("/users/register", {
+        FullName: fullName,
+        Gender: gender,
+        Email: email,
+        Password: password,
+      });
+      setSuccess("Registration Successful! Please click login below.");
+      setError("");
     } catch (error) {
-      alert(error.message);
+      setError(
+        error.response?.data?.message ||
+          "Registration failed! Please try again."
+      );
+      setSuccess("");
     }
   };
   return (
@@ -97,7 +107,8 @@ export default function Register() {
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
-
+          {success && <p className="text-green-600">{success}</p>}
+          {error && <p className="text-red-600">{error}</p>}
           <button
             type="submit"
             className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg font-semibold transition duration-200"

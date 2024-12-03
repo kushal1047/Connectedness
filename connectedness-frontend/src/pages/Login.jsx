@@ -5,7 +5,7 @@ import api from "../services/axios";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -19,21 +19,20 @@ export default function Login() {
       localStorage.setItem("userId", res.data.userId);
       navigate("/dashboard");
     } catch (error) {
-      setError(error.response?.data.message || "Login Failed!");
+      setError(
+        error.response?.data.message || "Login Failed! Please try again."
+      );
     }
   };
   return (
-    <div className="flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
+    <div className="flex items-center justify-center bg-[#FFE0E6] min-h-screen">
       <div className="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white">
-        <h2 className="text-3xl font-bold mb-6 text-center text-green-600">
+        <h2 className="text-3xl font-bold mb-6 text-center text-[#004FA4]">
           Login and Connect
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label
-              htmlFor="email"
-              className="block mb-1 text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block mb-1 text-sm font-medium">
               Email
             </label>
             <input
@@ -49,7 +48,7 @@ export default function Login() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm mb-1 font-medium text-gray-700"
+              className="block text-sm mb-1 font-medium"
             >
               Password
             </label>
@@ -64,16 +63,11 @@ export default function Login() {
             />
           </div>
           {error && <div className="text-red-600">{error}</div>}
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white rounded-lg py-2 px-4 font-semibold transition duration-200"
-          >
-            Sign in
-          </button>
+          <button type="submit">Sign in</button>
         </form>
-        <p className="text-sm mt-4 text-gray-700 text-center">
+        <p className="text-sm mt-4 text-center">
           Don't have an account?{" "}
-          <a href="/register" className="text-green-600 hover:underline">
+          <a href="/register" className="hover:underline">
             Register Here
           </a>
         </p>
