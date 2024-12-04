@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply font-sans text-[#004FA4];
+  @apply font-sans text-[#004FA4] bg-[#FFE0E6];
 }
 
 button {

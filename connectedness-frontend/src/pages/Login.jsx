@@ -42,7 +42,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF2D55]"
             />
           </div>
           <div>
@@ -59,7 +59,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full py-2 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full py-2 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF2D55]"
             />
           </div>
           {error && <div className="text-red-600">{error}</div>}
