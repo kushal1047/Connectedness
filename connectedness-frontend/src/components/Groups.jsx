@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../services/axios";
 
-export default function Dashboard() {
+export default function UserGroups() {
   const [groups, setGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { register } from "../services/authService";
 import api from "../services/axios";
+import logo from "../assets/connectedness-full-logo.png";
 
 export default function Register() {
   const [fullName, setFullName] = useState("");
@@ -30,7 +31,7 @@ export default function Register() {
     }
   };
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white">
         <h2 className="text-3xl font-bold mb-6 text-center">
           Create an Account

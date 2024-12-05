@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./components/Dashboard";
+import UserGroups from "./components/Groups";
 import GroupDetails from "./pages/GroupDetails";
 import TestPage from "./pages/testPage";
 import CreateQuestions from "./pages/CreateQuestions";
@@ -21,7 +21,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         {/* Protected Routes under here */}
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/user-groups" element={<UserGroups />} />
         <Route path="/group/:groupId" element={<GroupDetails />} />
         <Route path="/create-questions" element={<CreateQuestions />} />
         <Route path="/answer-questions" element={<AnswerQuestions />} />
