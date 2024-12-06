@@ -11,6 +11,11 @@ namespace Connectedness.API.Services
     public class JwtService(IConfiguration config)
     {
         private readonly IConfiguration _config = config;
+
+        public string GenerateRefreshToken()
+        {
+
+        }
         public string GenerateToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));

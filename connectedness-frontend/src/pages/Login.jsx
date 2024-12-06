@@ -26,7 +26,7 @@ export default function Login() {
     }
   };
   return (
-    <div className="flex flex-col items-center justify-center bg-[#FFE0E6] min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <img src={logo} alt="Logo" className="mb-6 w-48 h-auto" />
       <div className="w-full max-w-md p-8 rounded-2xl shadow-lg bg-white">
         <h2 className="text-3xl font-bold mb-6 text-center text-[#004FA4]">

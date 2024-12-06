@@ -11,6 +11,7 @@ namespace Connectedness.API.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMember> GroupMembers { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
        protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);

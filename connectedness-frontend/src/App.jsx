@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import UserGroups from "./components/Groups";
+import UserGroups from "./components/UserGroups";
 import GroupDetails from "./pages/GroupDetails";
 import TestPage from "./pages/testPage";
 import CreateQuestions from "./pages/CreateQuestions";
