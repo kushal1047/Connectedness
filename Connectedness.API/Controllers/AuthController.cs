@@ -1,17 +1,42 @@
-using System.Runtime.InteropServices;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Connectedness.API.Models;
+using Connectedness.API.Services;
+using Connectedness.API.Data;
 
-// In SDK-style projects such as this one, several assembly attributes that were historically
-// defined in this file are now automatically added during build and populated with
-// values defined in project properties. For details of which attributes are included
-// and how to customise this process see: https://aka.ms/assembly-info-properties
+namespace Connectedness.API.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController(JwtService jwtService, AppDbContext context): ControllerBase
+    {
+        private readonly AppDbContext _context = context;
+        private readonly JwtService _jwtService = jwtService;
 
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            var tokenEntity = await _context.RefreshTokens.Include(token => token.User).FirstOrDefaultAsync(token=> token.Token == refreshToken);
+            if (tokenEntity == null || !tokenEntity.isActive) {
+                return Unauthorized("Invalid or expired token!");
+            }
 
-// Setting ComVisible to false makes the types in this assembly not visible to COM
-// components.  If you need to access a type in this assembly from COM, set the ComVisible
-// attribute to true on that type.
+            tokenEntity.Revoked = DateTime.UtcNow;
 
-[assembly: ComVisible(false)]
+            var newJwtToken = _jwtService.GenerateToken(tokenEntity.User!);
+            var newRefreshToken = _jwtService.GenerateRefreshToken();
 
-// The following GUID is for the ID of the typelib if this project is exposed to COM.
-
-[assembly: Guid("0c4f2c5a-4b0f-474e-ba74-f2c23a1f491d")]
+            var newRefreshTokenEntity = new RefreshToken()
+            {
+                Token = newRefreshToken,
+                Created = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(30),
+                UserId = tokenEntity.UserId,
+            };
+            _context.RefreshTokens.Add(newRefreshTokenEntity);
+            await _context.SaveChangesAsync();
+            return Ok(new {token=newJwtToken, refreshToken=newRefreshToken, userId = tokenEntity.UserId});
+        }
+    }
+}
