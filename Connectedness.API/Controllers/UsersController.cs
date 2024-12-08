@@ -23,8 +23,19 @@ namespace Connectedness.API.Controllers
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash)) {
                 return BadRequest(new { message = "Invalid Email or Password. Please try again." });
             }
-            var token = _jwtService.GenerateToken(user);
-            return Ok(new {message = "Login successful!", userId = user.UserId, token});
+            var jwtToken = _jwtService.GenerateToken(user);
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            var refreshTokenEntity = new RefreshToken()
+            {
+                Token = refreshToken,
+                Created = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(30),
+                UserId = user.UserId,
+            };
+            _context.RefreshTokens.Add(refreshTokenEntity);
+            await _context.SaveChangesAsync();
+
+            return Ok(new {message = "Login successful!", userId = user.UserId, token = jwtToken, refreshToken});
         }
 
         [HttpPost("register")]
